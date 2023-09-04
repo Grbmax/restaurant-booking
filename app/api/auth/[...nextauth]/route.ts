@@ -1,27 +1,30 @@
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { PrismaClient } from '@prisma/client';
-import NextAuth, { Awaitable, RequestInternal, User } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
+import NextAuth, { Awaitable, NextAuthOptions, RequestInternal, User } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 const prisma = new PrismaClient();
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
-            id: "credentials",
-            name: "credentials",
+            name: 'Credentials',
             credentials: {
-                username: {
-                    label: "Email-ID",
-                    type: "text",
-                    placeholder: "john@doe.com"
+                email: {
+                    label: 'Email',
+                    type: 'email',
+                    placeholder: 'john@doe.com'
                 },
-                password: {}
+                password: { label: 'Password', type: 'password' }
             },
-            authorize: function (credentials: Record<'username' | 'password', string> | undefined, req: Pick<RequestInternal, 'query' | 'body' | 'headers' | 'method'>): Awaitable<User | null> {
-                throw new Error('Function not implemented.');
+            authorize: function (credentials: Record<"email" | "password", string> | undefined, req: Pick<RequestInternal, "query" | "body" | "headers" | "method">): Awaitable<User | null> {
+                const user = {id: '1', name: 'John'}
+                return user
             }
         })
     ],
-    adapter: PrismaAdapter(prisma)
-})
+    session: { strategy: 'jwt' }
+}
+
+const handler = NextAuth(authOptions)
+export { handler as GET, handler as POST }
