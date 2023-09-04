@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id         String       @id @default(uuid())
+  name       String
+  email      String
+  password   String
+  role       String       @default("user") //restaurant | admin | user
+  image      String
+  restaurant Restaurant[] @relation("UserToRestaurant")
+  booking    Booking[]    @relation("UserToBooking")
+}
+
+model Restaurant {
+  id          String    @id @default(uuid())
+  ownerId     String
+  owner       User      @relation("UserToRestaurant", fields: [ownerId], references: [id])
+  name        String
+  isActive    Boolean   @default(false)
+  description String
+  cuisine     String
+  imageUrl    String
+  opensAt     String //HH:MM
+  closedAt    String //HH:MM
+  tables      Table[]   @relation("RestaurantToTable")
+  images      Image[]   @relation("RestaurantToImage")
+  bookings    Booking[] @relation("RestaurantToBooking")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+  @@index([ownerId])
+}
+
+model Table {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [id])
+  capacity     Int
+  isActive     Boolean    @default(false)
+  bookings     Booking[]  @relation("TableToBooking")
+
+  @@index([restaurantId])
+}
+
+model Booking {
+  id           String     @id @default(uuid())
+  date         DateTime
+  numPeople    Int
+  customerId   String
+  customer     User       @relation("UserToBooking", fields: [customerId], references: [id])
+  restaurantId String
+  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [id])
+  tableId      String
+  table        Table      @relation("TableToBooking", fields: [tableId], references: [id])
+
+  @@index([customerId])
+  @@index([restaurantId])
+  @@index([tableId])
+}
+
+model Image {
+  id           String     @id
+  restaurantId String
+  restaurant   Restaurant @relation("RestaurantToImage", fields: [restaurantId], references: [id])
+  url          String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([restaurantId])
+}
