@@ -1,10 +1,19 @@
-import { getServerSession } from "next-auth";
+"use client"
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { useRestaurantModal } from "@/hooks/use-restaurant-modal";
+import { useEffect } from "react";
 
-export default async function Home() {
-  const session = await getServerSession(authOptions);
-  return (
-    <div>{JSON.stringify(session)}</div>
-  )
+const SetupPage = () => {
+  const onOpen = useRestaurantModal((state) => state.onOpen)
+  const isOpen = useRestaurantModal((state) => state.isOpen)
+
+  useEffect(() => {
+    if (!isOpen) {
+      onOpen();
+    }
+  }, [isOpen, onOpen])
+
+  return null;
 }
+ 
+export default SetupPage;

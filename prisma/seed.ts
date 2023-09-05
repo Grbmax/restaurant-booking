@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const password = await hash("test", 12);
-  const user = await prisma.user.upsert({
+  const admin_user = await prisma.user.upsert({
     where: { email: "gaurav@code-b.in" },
     update: {},
     create: {
@@ -17,6 +17,18 @@ async function main() {
     },
   });
 
+  const user = await prisma.user.upsert({
+    where: { email: "test@test.com" },
+    update: {},
+    create: {
+      email: "test@test.com",
+      name: "Test",
+      image: 'URL',
+      password,
+    },
+  });
+
+  console.log({ admin_user });
   console.log({ user });
 }
 main()

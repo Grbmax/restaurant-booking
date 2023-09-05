@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  id         String       @id @default(uuid())
+  userId     String       @id @default(uuid())
   name       String
   email      String       @unique
   password   String
@@ -23,29 +23,24 @@ model User {
 }
 
 model Restaurant {
-  id          String    @id @default(uuid())
-  ownerId     String
-  owner       User      @relation("UserToRestaurant", fields: [ownerId], references: [id])
-  name        String
-  isActive    Boolean   @default(false)
-  description String
-  cuisine     String
-  imageUrl    String
-  opensAt     String //HH:MM
-  closedAt    String //HH:MM
-  tables      Table[]   @relation("RestaurantToTable")
-  images      Image[]   @relation("RestaurantToImage")
-  bookings    Booking[] @relation("RestaurantToBooking")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
+  restaurantId String    @id @default(uuid())
+  userId       String
+  name         String
+  isActive     Boolean   @default(false)
+  user         User      @relation("UserToRestaurant", fields: [userId], references: [userId])
+  tables       Table[]   @relation("RestaurantToTable")
+  images       Image[]   @relation("RestaurantToImage")
+  bookings     Booking[] @relation("RestaurantToBooking")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
 
-  @@index([ownerId])
+  @@index([userId])
 }
 
 model Table {
-  id           String     @id @default(uuid())
+  tableId      String     @id @default(uuid())
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [id])
+  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [restaurantId])
   capacity     Int
   isActive     Boolean    @default(false)
   bookings     Booking[]  @relation("TableToBooking")
@@ -54,17 +49,17 @@ model Table {
 }
 
 model Booking {
-  id           String     @id @default(uuid())
+  bookingId    String     @id @default(uuid())
   date         DateTime
   numPeople    Int
-  customerId   String
-  customer     User       @relation("UserToBooking", fields: [customerId], references: [id])
+  userId       String
+  user         User       @relation("UserToBooking", fields: [userId], references: [userId])
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [id])
+  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [restaurantId])
   tableId      String
-  table        Table      @relation("TableToBooking", fields: [tableId], references: [id])
+  table        Table      @relation("TableToBooking", fields: [tableId], references: [tableId])
 
-  @@index([customerId])
+  @@index([userId])
   @@index([restaurantId])
   @@index([tableId])
 }
@@ -72,7 +67,7 @@ model Booking {
 model Image {
   id           String     @id
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToImage", fields: [restaurantId], references: [id])
+  restaurant   Restaurant @relation("RestaurantToImage", fields: [restaurantId], references: [restaurantId])
   url          String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt

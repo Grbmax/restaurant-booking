@@ -23,7 +23,6 @@ export const authOptions: NextAuthOptions = {
         req: Pick<RequestInternal, "query" | "body" | "headers" | "method">
       ) {
         if (!credentials?.email || !credentials.password) {
-          console.log(1);
           return null;
         }
         const user = await prisma.user.findUnique({
@@ -33,7 +32,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          console.log(2);
           return null;
         }
 
@@ -43,12 +41,11 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
-          console.log(3)
           return null;
         }
 
         return {
-          id: user.id,
+          userId: user.userId,
           email: user.email,
           name: user.name,
           role: user.role,
@@ -59,23 +56,21 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     session: ({ session, token }) => {
-      console.log('Session Callback', {session, token})
+      // console.log('Session Callback', {session, token})
       return {
-        ...session,
-        id: token.id,
+        userId: token.userId,
         role: token.role,
-        image: token.image
+        ...session,
       }
     },
     jwt: ({ token, user }) => {
-      console.log('JWT Callback', {token,user})
+      // console.log('JWT Callback', {token,user})
       if (user) {
         const u = user as unknown as User
         return {
           ...token,
-          id: u.id,
+          userId: u.userId,
           role: u.role,
-          image: u.image
         }
       }
       return token
