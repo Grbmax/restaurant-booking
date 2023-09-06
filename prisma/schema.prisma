@@ -25,7 +25,7 @@ model User {
 model Restaurant {
   restaurantId String    @id @default(uuid())
   userId       String
-  name         String
+  name         String    @unique
   isActive     Boolean   @default(false)
   user         User      @relation("UserToRestaurant", fields: [userId], references: [userId])
   tables       Table[]   @relation("RestaurantToTable")

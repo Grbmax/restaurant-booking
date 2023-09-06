@@ -1,31 +1,25 @@
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { CustomSession } from "@/types";
 import { redirect } from "next/navigation";
 import prismadb from "@/lib/prismadb";
+import AuthSignOut from "./auth-signout";
+import MainNav from "./main-nav";
 
 const Navbar = async () => {
-  const { userId, role } = (await getServerSession(
-    authOptions
-  )) as CustomSession;
-  if (!userId && role !== "admin") {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.userId
+  const role = session?.user?.role
+  if (!userId && role === "user") {
     redirect("/api/auth/signin");
   }
 
-  const restaurant = await prismadb.restaurant.findMany({
-    where: {
-      userId,
-    },
-  });
 
   return (
     <div className="border-b">
-      <div className="flex h-8 w-full items-center px-4 space-x-4">
-        <p>Navbar</p>
-        <p>
-        {restaurant[0].name}
-        </p>
+      <div className="flex h-16 w-full items-center px-4 space-x-4 justify-between">
+        <MainNav className="text-bold" />
+        <AuthSignOut />
       </div>
     </div>
   );

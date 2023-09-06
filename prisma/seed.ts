@@ -17,6 +17,18 @@ async function main() {
     },
   });
 
+  const owner = await prisma.user.upsert({
+    where: { email: "owner@test.com" },
+    update: {},
+    create: {
+      email: "owner@test.com",
+      role: "owner",
+      name: "Owner",
+      image: 'URL',
+      password,
+    },
+  });
+  
   const user = await prisma.user.upsert({
     where: { email: "test@test.com" },
     update: {},
@@ -28,7 +40,9 @@ async function main() {
     },
   });
 
+
   console.log({ admin_user });
+  console.log({ owner });
   console.log({ user });
 }
 main()

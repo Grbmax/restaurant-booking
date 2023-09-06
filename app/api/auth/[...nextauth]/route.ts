@@ -55,25 +55,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: ({ session, token }) => {
-      // console.log('Session Callback', {session, token})
-      return {
-        userId: token.userId,
-        role: token.role,
-        ...session,
-      }
-    },
     jwt: ({ token, user }) => {
       // console.log('JWT Callback', {token,user})
       if (user) {
-        const u = user as unknown as User
-        return {
-          ...token,
-          userId: u.userId,
-          role: u.role,
-        }
+        token.userId = user.userId;
+        token.role = user.role;
       }
-      return token
+      return token;
+    },
+    session: ({ session, token }) => {
+      // console.log('Session Callback', {session, token})
+      if( token && session.user ) {
+        session.user.role = token.role;
+        session.user.userId = token.userId;
+      }
+      return session
     }
   },
   session: { strategy: "jwt" },

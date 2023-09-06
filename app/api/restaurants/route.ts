@@ -2,12 +2,13 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server"
 
 import { authOptions } from "../auth/[...nextauth]/route";
-import { CustomSession } from "@/types";
 import prismadb from "@/lib/prismadb";
 
 export async function POST(req: Request) {
     try {
-        const { userId, role } = await getServerSession(authOptions) as CustomSession
+        const session = await getServerSession(authOptions)
+        const userId = session?.user?.userId
+        const role = session?.user?.role
         const body = await req.json();
 
         const { name } = body;

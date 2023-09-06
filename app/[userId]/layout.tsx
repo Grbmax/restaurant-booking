@@ -2,8 +2,6 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { CustomSession } from "@/types";
-import prismadb from "@/lib/prismadb";
 import Navbar from "@/components/navbar";
 
 export default async function DashboardLayout({
@@ -13,23 +11,12 @@ export default async function DashboardLayout({
   children: React.ReactNode;
   params: { restaurantId: string };
 }) {
-  const { userId, role } = (await getServerSession(
-    authOptions
-  )) as CustomSession;
+  const session = await getServerSession(authOptions)
+  const userId = session?.user?.userId
+  const role = session?.user?.role
 
-  if (!userId || role !== "admin") {
+  if (!userId || role === "user") {
     redirect("/api/auth/signin");
-  }
-
-  const restaurant = await prismadb.restaurant.findFirst({
-    where: {
-      restaurantId: params.restaurantId,
-      userId,
-    },
-  });
-
-  if (!restaurant) {
-    redirect("/");
   }
 
   return (
