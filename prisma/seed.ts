@@ -29,6 +29,18 @@ async function main() {
     },
   });
 
+  const admin_user3 = await prisma.user.upsert({
+    where: { email: "admin@test.com" },
+    update: {},
+    create: {
+      email: "admin@test.com",
+      name: "Admin Test",
+      role: "admin",
+      image: "URL",
+      password,
+    },
+  });
+
   const owner1 = await prisma.user.upsert({
     where: { email: "owner1@test.com" },
     update: {},
@@ -52,6 +64,19 @@ async function main() {
       password,
     },
   });
+
+  const owner3 = await prisma.user.upsert({
+    where: { email: "owner3@test.com" },
+    update: {},
+    create: {
+      email: "owner3@test.com",
+      role: "owner",
+      name: "Owner 3",
+      image: "URL",
+      password,
+    },
+  });
+
 
   const resto1 = await prisma.restaurant.create({
     data: {

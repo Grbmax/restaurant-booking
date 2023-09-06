@@ -15,7 +15,8 @@ export default async function DashboardLayout({
   const userId = session?.user?.userId
   const role = session?.user?.role
 
-  if (!userId || params.userId !== userId || role === "user") {
+
+  if (!userId || role === "user") {
     redirect("/api/auth/signin");
   }
 

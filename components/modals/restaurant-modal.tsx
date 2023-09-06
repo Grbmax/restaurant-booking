@@ -18,6 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast"
+import { useSession } from "next-auth/react";
+import prismadb from "@/lib/prismadb";
 
 const formSchema = z.object({
   name: z.string().min(1, {

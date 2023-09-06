@@ -27,6 +27,12 @@ const MainNav = ({
       label: "Restaurants",
       active: pathname === `/${params.userId}/restaurants`,
     },
+
+    {
+      href: `/${params.userId}/bookings`,
+      label: "Bookings",
+      active: pathname === `/${params.userId}/bookings`,
+    },
   ];
 
 

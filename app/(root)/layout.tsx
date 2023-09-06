@@ -13,9 +13,10 @@ export default async function SetupLayout({
   const userId = session?.user?.userId;
   const role = session?.user?.role;
 
-  if (!userId) {
+  if (!userId || !session || role === "user") {
     redirect("/api/auth/signin");
   }
+
 
   if (role === "admin") {
     const restaurant = await prismadb.restaurant.findFirst({
@@ -24,7 +25,7 @@ export default async function SetupLayout({
       },
     });
     if (restaurant) {
-      console.log(userId)
+      console.log(restaurant)
       redirect(`/${userId}`);
     }
   }
@@ -40,8 +41,10 @@ export default async function SetupLayout({
       },
     });
     if (restaurant) {
-      // redirect(`/${userId}`);
-    }
+      redirect(`/${userId}`);
+    } else {
+      redirect('/api/auth/signin')
+    } 
   }
 
   return <>{children}</>;
