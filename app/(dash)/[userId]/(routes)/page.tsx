@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 const DashboardPage = async ({
   params,
 }: {
-  params: { restaurantId: string };
+  params: { userId: string };
 }) => {
   const session = await getServerSession(authOptions);
 //   const userId = session?.user?.userId;

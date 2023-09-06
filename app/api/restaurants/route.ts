@@ -28,11 +28,11 @@ export async function POST(req: Request) {
         const restaurant = await prismadb.restaurant.create({
             data: {
                 name,
-                userId
+                adminId: userId
             }
         })
 
-        return NextResponse.json(restaurant);
+        if(restaurant) return NextResponse.json(userId);
 
 
     } catch (error) {

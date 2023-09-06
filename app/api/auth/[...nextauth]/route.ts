@@ -1,7 +1,6 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient, User } from "@prisma/client";
 import { compare } from "bcrypt";
-import NextAuth, { RequestInternal, type NextAuthOptions } from "next-auth";
+import NextAuth, { RequestInternal, type NextAuthOptions, Awaitable } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 const prisma = new PrismaClient();
@@ -18,40 +17,13 @@ export const authOptions: NextAuthOptions = {
         },
         password: { label: "Password", type: "password" },
       },
-      async authorize(
-        credentials: Record<"email" | "password", string> | undefined,
-        req: Pick<RequestInternal, "query" | "body" | "headers" | "method">
-      ) {
-        if (!credentials?.email || !credentials.password) {
-          return null;
+      async authorize = (
+        credentials: Record<"email" | "password", string> | undefined, 
+        req: Pick<RequestInternal, "query" | "body" | "headers" | "method">) => 
+        
+        {
+
         }
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-
-        if (!user) {
-          return null;
-        }
-
-        const isPasswordValid = await compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          userId: user.userId,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          image: user.image
-        };
-      },
     }),
   ],
   callbacks: {

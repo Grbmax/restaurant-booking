@@ -24,6 +24,7 @@ export default async function SetupLayout({
       },
     });
     if (restaurant) {
+      console.log(userId)
       redirect(`/${userId}`);
     }
   }
@@ -39,7 +40,7 @@ export default async function SetupLayout({
       },
     });
     if (restaurant) {
-      redirect(`/${userId}`);
+      // redirect(`/${userId}`);
     }
   }
 

@@ -9,13 +9,13 @@ export default async function DashboardLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { restaurantId: string };
+  params: { userId: string };
 }) {
   const session = await getServerSession(authOptions)
   const userId = session?.user?.userId
   const role = session?.user?.role
 
-  if (!userId || role === "user") {
+  if (!userId || params.userId !== userId || role === "user") {
     redirect("/api/auth/signin");
   }
 

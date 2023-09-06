@@ -41,7 +41,7 @@ export const RestaurantModal = () => {
     try {
         setLoading(true);
         const response = await axios.post('/api/restaurants', values);
-        window.location.assign(`${response.data.restaurantId}`)
+        window.location.assign(`${response.data.userId}`)
     } catch (error) {
         toast.error("Something went wrong.");
     } finally {
