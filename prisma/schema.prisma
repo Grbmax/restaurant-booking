@@ -12,37 +12,37 @@ datasource db {
 }
 
 model User {
-  userId     String       @id @default(uuid())
-  name       String
-  email      String       @unique
-  password   String
-  role       String       @default("user") //restaurant | admin | user
-  image      String
-  restaurant Restaurant[] @relation("UserToRestaurant")
-  booking    Booking[]    @relation("UserToBooking")
+  userId           String       @id @default(uuid())
+  name             String
+  email            String       @unique
+  password         String
+  role             String       @default("user") //owner | admin | user
+  image            String
+  adminRestaurants Restaurant[] @relation("Admin")
+  ownerRestaurants Restaurant[] @relation("Owners")
+  bookings         Booking[]    @relation("UserToBooking")
 }
 
 model Restaurant {
-  iD           String    @id @default(uuid())
-  restaurantId String    @default(uuid())
-  userId       String
-  role         String
+  restaurantId String    @id @default(uuid())
   name         String
   isActive     Boolean   @default(false)
-  user         User      @relation("UserToRestaurant", fields: [userId], references: [userId])
+  adminId      String?
+  admin        User?     @relation("Admin", fields: [adminId], references: [userId])
+  owners       User[]    @relation("Owners")
   tables       Table[]   @relation("RestaurantToTable")
   images       Image[]   @relation("RestaurantToImage")
   bookings     Booking[] @relation("RestaurantToBooking")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now())
 
-  @@index([userId])
+  @@index([adminId], name: "adminIndex")
 }
 
 model Table {
   tableId      String     @id @default(uuid())
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [iD])
+  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [restaurantId])
   capacity     Int
   isActive     Boolean    @default(false)
   bookings     Booking[]  @relation("TableToBooking")
@@ -57,7 +57,7 @@ model Booking {
   userId       String
   user         User       @relation("UserToBooking", fields: [userId], references: [userId])
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [iD])
+  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [restaurantId])
   tableId      String
   table        Table      @relation("TableToBooking", fields: [tableId], references: [tableId])
 
@@ -67,7 +67,7 @@ model Booking {
 }
 
 model Image {
-  id           String     @id
+  imageId      String     @id
   restaurantId String
   restaurant   Restaurant @relation("RestaurantToImage", fields: [restaurantId], references: [restaurantId])
   url          String

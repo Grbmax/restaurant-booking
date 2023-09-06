@@ -17,14 +17,30 @@ export default async function SetupLayout({
     redirect("/api/auth/signin");
   }
 
-  const restaurant = await prismadb.restaurant.findFirst({
-    where: {
-      userId,
-    },
-  });
-  if (restaurant && role !== "user") {
-    // console.log(restaurant)
-    redirect(`/${userId}`);
+  if (role === "admin") {
+    const restaurant = await prismadb.restaurant.findFirst({
+      where: {
+        adminId: userId,
+      },
+    });
+    if (restaurant) {
+      redirect(`/${userId}`);
+    }
+  }
+
+  if (role === "owner") {
+    const restaurant = await prismadb.restaurant.findFirst({
+      where: {
+        owners: {
+          some: {
+            userId
+          }
+        }
+      },
+    });
+    if (restaurant) {
+      redirect(`/${userId}`);
+    }
   }
 
   return <>{children}</>;
