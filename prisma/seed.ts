@@ -40,6 +40,22 @@ async function main() {
     },
   });
 
+  const admin_resto = await prisma.restaurant.create({
+    data: {
+      userId: admin_user.userId,
+      name: "Test",
+      role: admin_user.role
+    }
+  })
+
+  const owner_resto = await prisma.restaurant.create({
+    data: {
+      userId: owner.userId,
+      name: "Test",
+      role: admin_user.role
+    }
+  })
+
 
   console.log({ admin_user });
   console.log({ owner });

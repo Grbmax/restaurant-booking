@@ -23,9 +23,11 @@ model User {
 }
 
 model Restaurant {
-  restaurantId String    @id @default(uuid())
+  iD           String    @id @default(uuid())
+  restaurantId String    @default(uuid())
   userId       String
-  name         String    @unique
+  role         String
+  name         String
   isActive     Boolean   @default(false)
   user         User      @relation("UserToRestaurant", fields: [userId], references: [userId])
   tables       Table[]   @relation("RestaurantToTable")
@@ -40,7 +42,7 @@ model Restaurant {
 model Table {
   tableId      String     @id @default(uuid())
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [restaurantId])
+  restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [iD])
   capacity     Int
   isActive     Boolean    @default(false)
   bookings     Booking[]  @relation("TableToBooking")
@@ -55,7 +57,7 @@ model Booking {
   userId       String
   user         User       @relation("UserToBooking", fields: [userId], references: [userId])
   restaurantId String
-  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [restaurantId])
+  restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [iD])
   tableId      String
   table        Table      @relation("TableToBooking", fields: [tableId], references: [tableId])
 
