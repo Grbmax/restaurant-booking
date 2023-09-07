@@ -25,7 +25,6 @@ export default async function SetupLayout({
       },
     });
     if (restaurant) {
-      console.log(restaurant)
       redirect(`/${userId}`);
     }
   }

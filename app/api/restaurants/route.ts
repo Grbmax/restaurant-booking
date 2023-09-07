@@ -1,49 +1,44 @@
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server"
-
 import { authOptions } from "../auth/[...nextauth]/route";
 import prismadb from "@/lib/prismadb";
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function GET(
+    req: Request,
+    { params }: { params: { userId: string } }
+  ) {
     try {
-        const session = await getServerSession(authOptions)
-        const userId = session?.user?.userId
-        const role = session?.user?.role
-        const body = await req.json();
-
-        const { name } = body;
-
-        if (!userId) {
-            return new NextResponse("Unauthorized.", { status: 401 })
-        }
-
-        if (role !== "admin") {
-            return new NextResponse("Unauthorized.", { status: 401 })
-        }
-
-        if(!name) {
-            return new NextResponse("Name is required.", { status: 401 })
-        }
-
-        const restaurant = await prismadb.restaurant.create({
-            data: {
-                name,
-                adminId: userId
-            }
-        })
-
-        if(restaurant) return NextResponse.json(userId);
-
-
+      const session = await getServerSession(authOptions)
+      const userId = session?.user?.userId
+      const role = session?.user?.role
+  
+      if (role === "admin") {
+          const restaurants = await prismadb.restaurant.findMany({
+              where: {
+                  adminId: userId
+              },
+              include: {
+                  owners: true,
+                  images: true
+              }
+          })
+          return NextResponse.json(restaurants);
+      } else if (role === "owner") {
+          const restaurants = await prismadb.restaurant.findMany({
+              where: {
+                  owners : {
+                      some: {
+                          userId
+                      }
+                  }
+              }
+          })
+          return NextResponse.json(restaurants);
+      }
+  
+  
     } catch (error) {
-        console.log('[RESTAURANT_POST]', error)
-        return new NextResponse("Internal Error,", { status: 500 });
-    } 
-}
-
-// export async function GET(
-//     req: Request,
-//     { params } : { params : { restaurantI } }
-//     ) {
-    
-// }
+      console.log("[RESTAURANT_GET]", error);
+      return new NextResponse("Internal error", { status: 500 });
+    }
+  }

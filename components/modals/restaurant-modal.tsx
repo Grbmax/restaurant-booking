@@ -17,9 +17,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "react-hot-toast"
+import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
-import prismadb from "@/lib/prismadb";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -29,6 +28,7 @@ const formSchema = z.object({
 
 export const RestaurantModal = () => {
   const RestaurantModal = useRestaurantModal();
+  const { data: session, status } = useSession();
 
   const [loading, setLoading] = useState(false);
 
@@ -41,13 +41,17 @@ export const RestaurantModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      if (status === "authenticated") {
+        const currentId = session.user?.userId
         setLoading(true);
-        const response = await axios.post('/api/restaurants', values);
-        window.location.assign(`${response.data.userId}`)
+        const response = await axios.post(`/api/${currentId}/restaurants`, values);
+        console.log(response.data)
+        window.location.assign(`/${response.data}`);
+      }
     } catch (error) {
-        toast.error("Something went wrong.");
+      toast.error("Something went wrong.");
     } finally {
-        setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -86,7 +90,9 @@ export const RestaurantModal = () => {
                 >
                   Cancel
                 </Button>
-                <Button disabled={loading} type="submit">Continue</Button>
+                <Button disabled={loading} type="submit">
+                  Continue
+                </Button>
               </div>
             </form>
           </Form>

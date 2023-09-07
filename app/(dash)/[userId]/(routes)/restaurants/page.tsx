@@ -1,9 +1,13 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prismadb from "@/lib/prismadb";
+import { redirect } from "next/navigation";
 import { Restaurant } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+import { format } from "date-fns"
+
+
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import prismadb from "@/lib/prismadb";
 import { RestaurantClient } from "./components/client";
+import { RestaurantColumn } from "./components/column";
 
 const RestaurantsPage = async ({ params }: { params: { userId: string } }) => {
   const session = await getServerSession(authOptions);
@@ -49,10 +53,18 @@ const RestaurantsPage = async ({ params }: { params: { userId: string } }) => {
     });
   }
 
+  const formattedRestaurants: RestaurantColumn[] = restaurants.map((item) => ({
+    restaurantId: item.restaurantId,
+    name: item.name,
+    isActive: item.isActive,
+    createdAt: format(item.createdAt, "dd MMMM yyyy")
+  }
+  ))
+
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        {restaurants.length !== 0 && <RestaurantClient data={[]}/>}
+        {restaurants.length !== 0 && <RestaurantClient data={formattedRestaurants}/>}
       </div>
     </div>
   );

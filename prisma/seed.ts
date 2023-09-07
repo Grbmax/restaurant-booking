@@ -128,7 +128,7 @@ async function main() {
   });
 
   console.log("Admin 1: ", { admin_user });
-  console.log("Admin 2: ", { admin_user });
+  console.log("Admin 2: ", { admin_user2 });
   console.log("Owner 1: ", { owner1 });
   console.log("Owner 2: ", { owner2 });
   console.log("User: ", { user });
