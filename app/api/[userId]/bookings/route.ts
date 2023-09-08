@@ -32,31 +32,31 @@ export async function POST(
       }
 
   
-      const restaurant = await prismadb.restaurant.create({
-        data: {
-          name,
-          adminId: userId,
-          isActive: isActive || false, // Set isActive based on the request, defaulting to false if not provided
-          tables: {
-            createMany: {
-              data: Array.from({ length: numTables || 0 }, () => ({
-                capacity: tableCapacity || 0,
-                isBooked: false, // Set the table as active by default
-              })),
-            },
-          },
-          images: {
-            create: {
-              url: imageUrl || "URL" as string
-            }
-          }
-        },
-        include: {
-          tables: true,
-        },
-      });
+      // const restaurant = await prismadb.restaurant.create({
+      //   data: {
+      //     name,
+      //     adminId: userId,
+      //     isActive: isActive || false, // Set isActive based on the request, defaulting to false if not provided
+      //     tables: {
+      //       createMany: {
+      //         data: Array.from({ length: numTables || 0 }, () => ({
+      //           capacity: tableCapacity || 0,
+      //           isBooked: false, // Set the table as active by default
+      //         })),
+      //       },
+      //     },
+      //     images: {
+      //       create: {
+      //         url: imageUrl || "URL" as string
+      //       }
+      //     }
+      //   },
+      //   include: {
+      //     tables: true,
+      //   },
+      // });
   
-      if (restaurant) return NextResponse.json(restaurant);
+      return new NextResponse("Succesful", { status: 200 });
     } catch (error) {
       console.log("[RESTAURANT_POST]", error);
       return new NextResponse("Internal error", { status: 500 });
