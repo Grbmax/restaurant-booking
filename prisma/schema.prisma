@@ -44,7 +44,7 @@ model Table {
   restaurantId String
   restaurant   Restaurant @relation("RestaurantToTable", fields: [restaurantId], references: [restaurantId])
   capacity     Int
-  isActive     Boolean    @default(false)
+  isBooked     Boolean    @default(false)
   bookings     Booking[]  @relation("TableToBooking")
 
   @@index([restaurantId])
@@ -54,6 +54,7 @@ model Booking {
   bookingId    String     @id @default(uuid())
   date         DateTime
   numPeople    Int
+  isActive     Boolean    @default(true)
   userId       String
   user         User       @relation("UserToBooking", fields: [userId], references: [userId])
   restaurantId String
@@ -67,7 +68,7 @@ model Booking {
 }
 
 model Image {
-  imageId      String     @id
+  imageId      String     @id @default(uuid())
   restaurantId String
   restaurant   Restaurant @relation("RestaurantToImage", fields: [restaurantId], references: [restaurantId])
   url          String

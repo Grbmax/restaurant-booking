@@ -6,14 +6,11 @@ import { redirect, useParams, usePathname } from "next/navigation";
 
 const MainNav = ({
   className,
+  role,
   ...props
-}: React.HTMLAttributes<HTMLElement>) => {
+}: React.HTMLAttributes<HTMLElement> & { role: string | undefined }) => {
   const pathname = usePathname();
   const params = useParams();
-
-  const { data: session, status } = useSession();
-  const userId = session?.user?.userId;
-  const role = session?.user?.role;
 
   let routes = [
     {
@@ -35,10 +32,31 @@ const MainNav = ({
     },
   ];
 
+  if (role === "admin") {
+    routes = [
+      {
+        href: `/${params.userId}`,
+        label: "Home",
+        active: pathname === `/${params.userId}`,
+      },
+      {
+        href: `/${params.userId}/owners`,
+        label: "Owners",
+        active: pathname === `/${params.userId}/owners`,
+      },
 
+      {
+        href: `/${params.userId}/restaurants`,
+        label: "Restaurants",
+        active: pathname === `/${params.userId}/restaurants`,
+      },
 
-  if ((status === "authenticated" && !userId) || role === "user") {
-    redirect("/api/auth/signin");
+      {
+        href: `/${params.userId}/bookings`,
+        label: "Bookings",
+        active: pathname === `/${params.userId}/bookings`,
+      },
+    ];
   }
 
   return (

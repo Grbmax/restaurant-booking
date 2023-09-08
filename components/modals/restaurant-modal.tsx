@@ -45,8 +45,10 @@ export const RestaurantModal = () => {
         const currentId = session.user?.userId
         setLoading(true);
         const response = await axios.post(`/api/${currentId}/restaurants`, values);
-        console.log(response.data)
-        window.location.assign(`/${response.data}`);
+        if(response){
+          toast.success("Welcome admin.")
+          window.location.assign(`/${currentId}`);
+        }
       }
     } catch (error) {
       toast.error("Something went wrong.");
