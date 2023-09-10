@@ -1,13 +1,12 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-
-import { OwnerColumn, columns } from "./column";
-import { Heading } from "@/components/ui/heading";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { OwnerColumn, columns } from "./column";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
-import { Role } from "@/types/next-auth";
 import { ApiList } from "@/components/ui/api-list";
 
 interface OwnerClientProps {

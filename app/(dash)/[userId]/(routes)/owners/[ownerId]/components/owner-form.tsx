@@ -44,7 +44,6 @@ const formSchema = z.object({
 
 type OwnerFormValues = z.infer<typeof formSchema>;
 
-
 // Define the OwnerFormProps interface
 interface OwnerFormProps {
   initialData: User | null;
@@ -99,6 +98,7 @@ export const OwnerForm: React.FC<OwnerFormProps> = ({
       } else {
         await axios.post(`/api/${params.userId}/owners`, updatedData);
       }
+      router.refresh();
       router.push(`/${params.userId}/owners`);
       toast.success(toastMessage);
     } catch (error) {
@@ -112,7 +112,11 @@ export const OwnerForm: React.FC<OwnerFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.userId}/owners/${initialData?.userId}`);
+      if (initialData) {
+        await axios.delete(
+          `/api/${params.userId}/owners/${initialData.userId}`
+        );
+      }
       router.push(`/${params.userId}/owners`);
       toast.success("Owner deleted.");
     } catch (error) {

@@ -34,9 +34,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onDelete = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       await axios.delete(`/api/${params.userId}/owners/${data.userId}`)
       router.refresh();
+      router.push(`/${params.userId}/owners`);
       toast.success("Owner deleted.")
     } catch (error) {
       console.log(error)

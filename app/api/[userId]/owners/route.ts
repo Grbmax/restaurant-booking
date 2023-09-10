@@ -48,6 +48,7 @@ export async function POST(
         name,
         password: hashedPassword,
         image,
+        role: "owner"
       },
     });
     prismadb.$disconnect();
