@@ -5,14 +5,20 @@ import { CellAction } from "./cell-action";
 
 export type OwnerColumn = {
   userId: string;
-  name: string;
+  restaurantName: string;
+  userName: string;
   email: string;
-  createdAt: string;
+  date: string;
+  time: string;
 };
 
 export const columns: ColumnDef<OwnerColumn>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "restaurantName",
+    header: "Restaurant",
+  },
+  {
+    accessorKey: "userName",
     header: "Name",
   },
   {
@@ -20,7 +26,11 @@ export const columns: ColumnDef<OwnerColumn>[] = [
     header: "Email ID",
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "time",
+    header: "Time",
+  },
+  {
+    accessorKey: "date",
     header: "Date",
   },
   {

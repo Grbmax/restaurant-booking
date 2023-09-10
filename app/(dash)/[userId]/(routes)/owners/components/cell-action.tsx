@@ -35,12 +35,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const onDelete = async () => {
     try {
       setLoading(true)
-      await axios.delete(`/api/${params.userId}/bookings/${data.bookingId}`)
+      await axios.delete(`/api/${params.userId}/owners/${data.userId}`)
       router.refresh();
       toast.success("Owner deleted.")
     } catch (error) {
       console.log(error)
-      toast.error("Make sure you have removed all images, tables, and bookings associated first.");
+      toast.error("Something went wrong.");
     } finally {
       setLoading(false)
       setOpen(false);
@@ -66,11 +66,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <DropdownMenuLabel>
                 Actions
             </DropdownMenuLabel>
-            <DropdownMenuItem onClick={() =>(onCopy(data.bookingId))}>
+            <DropdownMenuItem onClick={() =>(onCopy(data.userId))}>
                 <Copy className="mr-2 h-4 w-4" />
                 Copy ID
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/${params.userId}/bookings/${data.bookingId}`)}>
+            <DropdownMenuItem onClick={() => router.push(`/${params.userId}/owners/${data.userId}`)}>
                 <Edit className="mr-2 h-4 w-4" />
                 Update
             </DropdownMenuItem>

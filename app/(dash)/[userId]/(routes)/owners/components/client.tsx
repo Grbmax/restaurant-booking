@@ -12,13 +12,9 @@ import { ApiList } from "@/components/ui/api-list";
 
 interface OwnerClientProps {
   data: OwnerColumn[];
-  role: Role | undefined;
 }
 
-export const OwnerClient: React.FC<OwnerClientProps> = ({
-  data,
-  role,
-}) => {
+export const OwnerClient: React.FC<OwnerClientProps> = ({ data }) => {
   const router = useRouter();
   const params = useParams();
 
@@ -29,18 +25,15 @@ export const OwnerClient: React.FC<OwnerClientProps> = ({
           title={`Owners (${data.length})`}
           description="Manage your owners."
         />
-        { role === "admin" &&
-          <Button
-            onClick={() => router.push(`/${params.userId}/bookings/new`)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add New
-          </Button>
-        }
+
+        <Button onClick={() => router.push(`/${params.userId}/owners/new`)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add New
+        </Button>
       </div>
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="name" />
-      <Heading title="API Endpoints" description="API calls for owners"/>
+      <DataTable columns={columns} data={data} searchKey="restaurantName" />
+      <Heading title="API Endpoints" description="API calls for owners" />
       <Separator />
       <ApiList entityName="owners" entityIdName="ownerId" />
     </>

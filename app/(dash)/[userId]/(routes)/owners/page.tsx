@@ -6,30 +6,41 @@ import { format } from "date-fns";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { OwnerClient } from "./components/client";
 import { OwnerColumn } from "./components/column";
+import prismadb from "@/lib/prismadb";
 
 const OwnersPage = async ({ params }: { params: { userId: string } }) => {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.userId;
   const role = session?.user?.role;
 
-  let owners: User[] = [];
-  if (params.userId !== userId || role === "user" || !userId) {
+  if (params.userId !== userId || role !== "admin" || !userId) {
     redirect("/api/auth/signin");
-  } else if (role === "admin") {
-  } else if (role === "owner") {
   }
 
-  const formattedOwners: OwnerColumn[] = owners.map((item) => ({
-    userId: item.userId,
-    name: item.name,
-    email: item.email,
-    createdAt: format(item.createdAt, "tt dd MMMM yy")
-  }))
+  const restaurantsManaged = await prismadb.restaurant.findMany({
+    where: {
+      adminId: userId
+    },
+    include: {
+      owners: true
+    }
+  });
+
+  const formattedOwners: OwnerColumn[] = restaurantsManaged.flatMap((restaurant) =>
+    restaurant.owners.map((owner) => ({
+      userId: owner.userId,
+      restaurantName: restaurant.name,
+      userName: owner.name,
+      email: owner.email,
+      time: format(owner.createdAt, "hh:mma"),
+      date: format(owner.createdAt, "dd/MM/yy")
+    }))
+  );
 
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        {owners && <OwnerClient data={formattedOwners} role={role} />}
+        <OwnerClient data={formattedOwners}/>
       </div>
     </div>
   );

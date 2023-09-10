@@ -14,8 +14,8 @@ datasource db {
 model User {
   userId           String       @id @default(uuid())
   name             String
-  email            String       @unique
   password         String
+  email            String       @unique
   role             String       @default("user") //owner | admin | user
   image            String
   createdAt        DateTime     @default(now())
