@@ -18,6 +18,8 @@ model User {
   password         String
   role             String       @default("user") //owner | admin | user
   image            String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
   adminRestaurants Restaurant[] @relation("Admin")
   ownerRestaurants Restaurant[] @relation("Owners")
   bookings         Booking[]    @relation("UserToBooking")
@@ -61,6 +63,8 @@ model Booking {
   restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [restaurantId])
   tableId      String
   table        Table      @relation("TableToBooking", fields: [tableId], references: [tableId])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@index([userId])
   @@index([restaurantId])

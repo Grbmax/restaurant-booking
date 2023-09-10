@@ -7,15 +7,18 @@ import { redirect, useParams, usePathname } from "next/navigation";
 const MainNav = ({
   className,
   role,
+  name,
   ...props
-}: React.HTMLAttributes<HTMLElement> & { role: string | undefined }) => {
+}: React.HTMLAttributes<HTMLElement> & { role: string | undefined } & {
+  name: string | undefined;
+}) => {
   const pathname = usePathname();
   const params = useParams();
 
   let routes = [
     {
       href: `/${params.userId}`,
-      label: "Home",
+      label: `${name}`,
       active: pathname === `/${params.userId}`,
     },
 
@@ -36,19 +39,19 @@ const MainNav = ({
     routes = [
       {
         href: `/${params.userId}`,
-        label: "Home",
+        label: `${name}`,
         active: pathname === `/${params.userId}`,
-      },
-      {
-        href: `/${params.userId}/owners`,
-        label: "Owners",
-        active: pathname === `/${params.userId}/owners`,
       },
 
       {
         href: `/${params.userId}/restaurants`,
         label: "Restaurants",
         active: pathname === `/${params.userId}/restaurants`,
+      },
+      {
+        href: `/${params.userId}/owners`,
+        label: "Owners",
+        active: pathname === `/${params.userId}/owners`,
       },
 
       {

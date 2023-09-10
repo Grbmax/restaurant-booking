@@ -1,41 +1,38 @@
 import { redirect } from "next/navigation";
-import { Booking } from "@prisma/client";
+import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { format } from "date-fns";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { BookingClient } from "./components/client";
-import { BookingColumn } from "./components/column";
+import { OwnerClient } from "./components/client";
+import { OwnerColumn } from "./components/column";
 
-const BookingsPage = async ({ params }: { params: { userId: string } }) => {
+const OwnersPage = async ({ params }: { params: { userId: string } }) => {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.userId;
   const role = session?.user?.role;
 
-  let bookings: Booking[] = [];
+  let owners: User[] = [];
   if (params.userId !== userId || role === "user" || !userId) {
     redirect("/api/auth/signin");
   } else if (role === "admin") {
   } else if (role === "owner") {
   }
 
-  const formattedBookings: BookingColumn[] = bookings.map((item) => ({
-    bookingId: item.bookingId,
-    restaurantId: item.restaurantId,
-    isActive: item.isActive,
+  const formattedOwners: OwnerColumn[] = owners.map((item) => ({
     userId: item.userId,
-    numPeople: item.numPeople,
-    tableId: item.tableId,
+    name: item.name,
+    email: item.email,
     createdAt: format(item.createdAt, "tt dd MMMM yy")
   }))
 
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        {bookings && <BookingClient data={formattedBookings} role={role} />}
+        {owners && <OwnerClient data={formattedOwners} role={role} />}
       </div>
     </div>
   );
 };
 
-export default BookingsPage;
+export default OwnersPage;

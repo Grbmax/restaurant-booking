@@ -2,7 +2,7 @@
 
 import * as z from "zod";
 import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Trash } from "lucide-react";
@@ -110,6 +110,7 @@ export const RestaurantForm: React.FC<RestaurantFormProps> = ({
         `/api/${params.userId}/restaurants/${params.restaurantId}`
       );
       router.refresh();
+      router.push(`/${params.userId}/restaurants`)
       toast.success("Restaurant deleted.");
     } catch (error) {
       console.log(error);

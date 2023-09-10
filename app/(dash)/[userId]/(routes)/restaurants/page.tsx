@@ -64,7 +64,7 @@ const RestaurantsPage = async ({ params }: { params: { userId: string } }) => {
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        {restaurants.length !== 0 && <RestaurantClient data={formattedRestaurants} role={role}/>}
+        <RestaurantClient data={formattedRestaurants} role={role}/>
       </div>
     </div>
   );
