@@ -1,14 +1,11 @@
-import { PrismaClient, User } from "@prisma/client";
+import prismadb from "@/lib/prismadb";
 import { compare } from "bcrypt";
-import { error } from "console";
 import NextAuth, {
   RequestInternal,
   type NextAuthOptions,
-  Awaitable,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -30,7 +27,7 @@ export const authOptions: NextAuthOptions = {
           if (!credentials?.email || !credentials.password) {
             return null;
           }
-          const user = await prisma.user.findUnique({
+          const user = await prismadb.user.findUnique({
             where: {
               email: credentials.email,
             },

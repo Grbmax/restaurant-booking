@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { BookingTable } from "@/components/ui/booking-table";
 import { Role } from "@/types/next-auth";
-import { ApiList } from "@/components/ui/api-list";
+import { PrivateApiList } from "@/components/ui/private-api-list";
 
 interface BookingClientProps {
   data: BookingColumn[];
@@ -42,7 +42,7 @@ export const BookingClient: React.FC<BookingClientProps> = ({
       <BookingTable columns={columns} data={data} searchKey="username" />
       <Heading title="API Endpoints" description="API calls for bookings"/>
       <Separator />
-      <ApiList entityName="bookings" entityIdName="bookingId" />
+      <PrivateApiList entityName="bookings" entityIdName="bookingId" />
     </>
   );
 };

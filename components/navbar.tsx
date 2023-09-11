@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prismadb from "@/lib/prismadb";
-import MainNav from "./main-nav";
 import { Button } from "@/components/ui/button";
+import MainNav from "./main-nav";
 
 const Navbar = async () => {
   const session = await getServerSession(authOptions);

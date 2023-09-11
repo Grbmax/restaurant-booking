@@ -1,8 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { redirect, useParams, usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 const MainNav = ({
   className,

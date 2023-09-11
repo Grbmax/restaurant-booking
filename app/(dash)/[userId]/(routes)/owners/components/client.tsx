@@ -7,7 +7,7 @@ import { Heading } from "@/components/ui/heading";
 import { OwnerColumn, columns } from "./column";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
-import { ApiList } from "@/components/ui/api-list";
+import { PrivateApiList } from "@/components/ui/private-api-list";
 
 interface OwnerClientProps {
   data: OwnerColumn[];
@@ -34,7 +34,7 @@ export const OwnerClient: React.FC<OwnerClientProps> = ({ data }) => {
       <DataTable columns={columns} data={data} searchKey="restaurantName" />
       <Heading title="API Endpoints" description="API calls for owners" />
       <Separator />
-      <ApiList entityName="owners" entityIdName="ownerId" />
+      <PrivateApiList entityName="owners" entityIdName="ownerId" />
     </>
   );
 };
