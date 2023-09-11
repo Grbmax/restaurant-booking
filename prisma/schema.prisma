@@ -57,18 +57,17 @@ model Booking {
   date         DateTime
   numPeople    Int
   isActive     Boolean    @default(true)
+  isFinished   Boolean    @default(false)
   userId       String
   user         User       @relation("UserToBooking", fields: [userId], references: [userId])
   restaurantId String
   restaurant   Restaurant @relation("RestaurantToBooking", fields: [restaurantId], references: [restaurantId])
-  tableId      String
-  table        Table      @relation("TableToBooking", fields: [tableId], references: [tableId])
+  bookedTables       Table[]    @relation("TableToBooking")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
   @@index([userId])
   @@index([restaurantId])
-  @@index([tableId])
 }
 
 model Image {

@@ -1,247 +1,407 @@
-import { getServerSession } from "next-auth";
-
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
-import prismadb from "@/lib/prismadb";
-import { url } from "inspector";
 
-export async function GET(
+import prismadb from "@/lib/prismadb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+export async function POST(
   req: Request,
-  { params }: { params: { userId: string; restaurantId: string } }
+  { params }: { params: { userId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.userId;
-    const role = session?.user?.role;
+    const body = await req.json();
+    const { date, restaurantId } = body;
 
-    if (role === "admin" && params.userId === userId) {
-      const restaurants = await prismadb.restaurant.findUnique({
-        where: {
-          adminId: userId,
-          restaurantId: params.restaurantId,
-        },
-        include: {
-          images: true,
-          owners: true,
-          bookings: true,
-          tables: true,
-        },
-      });
-      return NextResponse.json(restaurants);
+    if (!date) {
+      return new NextResponse("Date is required.", { status: 403 });
     }
 
-    if (role === "owner" && params.userId === userId) {
-      const restaurants = await prismadb.restaurant.findUnique({
-        where: {
-          owners: {
-            some: {
-              userId,
-            },
-          },
-          restaurantId: params.restaurantId,
-        },
-        include: {
-          images: true,
-          tables: true,
-          bookings: true,
-        },
-      });
-      return NextResponse.json(restaurants);
+    const numPeople = parseInt(body.numPeople, 10);
+
+    if (isNaN(numPeople)) {
+      return new NextResponse("Invalid value for numPeople.", { status: 400 });
     }
 
-    const restaurants = await prismadb.restaurant.findUnique({
+    const user = await prismadb.user.findUnique({
       where: {
-        restaurantId: params.restaurantId,
-      },
-      select: {
-        name: true,
-        restaurantId: true,
-        images: true,
-        createdAt: true,
-        updatedAt: true,
+        userId: params.userId,
       },
     });
-    return NextResponse.json(restaurants);
+
+    if (!user) {
+      return new NextResponse("Unauthenticated", { status: 403 });
+    }
+
+    const restaurant = await prismadb.restaurant.findUnique({
+      where: {
+        restaurantId,
+      },
+    });
+
+    if (!restaurant) {
+      return new NextResponse("Invalid restaurant ID.", { status: 400 });
+    }
+
+    if (!restaurant.isActive) {
+      return new NextResponse(
+        "Restaurant is currently not accepting bookings.",
+        { status: 400 }
+      );
+    }
+
+    const tableCapacity = await prismadb.table.findFirst({
+      where: {
+        restaurantId,
+      },
+      select: {
+        capacity: true,
+      },
+    });
+
+    if (!tableCapacity) {
+      return new NextResponse("Table capacity information not available.", {
+        status: 500,
+      });
+    }
+
+    const requiredTables = Math.ceil(numPeople / tableCapacity.capacity);
+
+    const tablesToBook = await prismadb.table.findMany({
+      where: {
+        restaurantId,
+        isBooked: false,
+      },
+      take: requiredTables,
+    });
+
+    if (tablesToBook.length < requiredTables) {
+      return new NextResponse("Not enough capacity for this booking.", {
+        status: 400,
+      });
+    }
+
+    const tableIds = tablesToBook.map((table) => table.tableId);
+
+    const createdBooking = await prismadb.booking.create({
+      data: {
+        date,
+        numPeople,
+        isActive: true,
+        isFinished: false,
+        userId: params.userId,
+        restaurantId,
+        bookedTables: {
+          connect: tableIds.map((tableId) => ({ tableId })),
+        },
+      },
+    });
+
+    await prismadb.table.updateMany({
+      where: {
+        tableId: { in: tableIds },
+      },
+      data: {
+        isBooked: true,
+      },
+    });
+
+    return NextResponse.json(createdBooking);
   } catch (error) {
-    console.log("[RESTAURANT_GET]", error);
-    return new NextResponse("Internal Error.", { status: 500 });
+    console.log("BOOKING_POST", error);
+    return new NextResponse("Internal error.", { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { userId: string; bookingId: string } }
+) {
+  try {
+    // Fetch the booking to check if it exists
+    const booking = await prismadb.booking.findUnique({
+      where: {
+        bookingId: params.bookingId,
+      },
+      include: {
+        // Include the associated tables for this booking
+        bookedTables: {
+          select: {
+            tableId: true,
+          },
+        },
+        restaurant: {
+          select: {
+            adminId: true,
+            owners: {
+              select: {
+                userId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      return new NextResponse("Booking not found.", { status: 404 });
+    }
+
+    // Check if the user has permission to delete this booking
+    const isAuthorized =
+      booking.userId === params.userId ||
+      booking.restaurant.adminId === params.userId ||
+      booking.restaurant.owners.some((owner) => owner.userId === params.userId);
+
+    if (!isAuthorized) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    // Check if the current session is valid for admins and owners
+    const session = await getServerSession(authOptions);
+    if (
+      session &&
+      (session.user?.role === "admin" || session.user?.role === "owner")
+    ) {
+      // Continue with the deletion process
+      // Update the associated tables to mark them as available (isBooked: false)
+      await prismadb.table.updateMany({
+        where: {
+          tableId: {
+            in: booking.bookedTables.map((table) => table.tableId),
+          },
+        },
+        data: {
+          isBooked: false,
+        },
+      });
+
+      // Delete the booking
+      await prismadb.booking.delete({
+        where: {
+          bookingId: params.bookingId,
+        },
+      });
+
+      return new NextResponse("Booking deleted successfully.", { status: 200 });
+    } else {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+  } catch (error) {
+    console.error("BOOKING_DELETE", error);
+    return new NextResponse("Internal error.", { status: 500 });
   }
 }
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { userId: string; restaurantId: string } }
+  { params }: { params: { userId: string; bookingId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.userId;
-    const role = session?.user?.role;
-
     const body = await req.json();
-    // console.log(body)
 
-    if (params.userId !== userId || !userId || role === "user") {
-      return new NextResponse("Unauthenticated.", { status: 401 });
-    }
-
-    const { name, imageUrl, numTables, tableCapacity, isActive } = body;
-
-    if (!name) {
-      return new NextResponse("Name is required.", { status: 400 });
-    }
-
-    if (!imageUrl) {
-      return new NextResponse("Image is required.", { status: 400 });
-    }
-
-    if (!numTables || !tableCapacity) {
-      return new NextResponse("Tables with capacity are required.", { status: 400 });
-    }
-
-    if (!params.restaurantId) {
-      return new NextResponse("Restaurant ID required.", { status: 400 });
-    }
-
-    const restaurantByUserID = await prismadb.restaurant.findFirst({
+    const booking = await prismadb.booking.findUnique({
       where: {
-        restaurantId: params.restaurantId,
-        owners: {
-          some: {
-            userId,
+        bookingId: params.bookingId,
+      },
+      include: {
+        bookedTables: {
+          select: {
+            tableId: true,
+          },
+        },
+        restaurant: {
+          select: {
+            adminId: true,
+            owners: {
+              select: {
+                userId: true,
+              },
+            },
           },
         },
       },
     });
 
-    const restaurantByAdmin = await prismadb.restaurant.findFirst({
-      where: {
-        restaurantId: params.restaurantId,
-        adminId: userId
-      }
-    })
-
-    if (!restaurantByUserID && !restaurantByAdmin) {
-      return new NextResponse("Unauthorized.", { status: 403 });
+    if (!booking) {
+      return new NextResponse("Booking not found.", { status: 404 });
     }
 
-    // Delete existing images and tables
-    await prismadb.image.deleteMany({
-      where: {
-        restaurantId: params.restaurantId,
-      },
-    });
+    if (
+      booking.restaurant?.adminId === params.userId ||
+      booking.restaurant.owners.some((owner) => owner.userId === params.userId)
+    ) {
+      const session = await getServerSession(authOptions);
+      if (!session || session.user?.role === "user") {
+        return new NextResponse("Unauthorized", { status: 403 });
+      }
 
-    await prismadb.table.deleteMany({
-      where: {
-        restaurantId: params.restaurantId,
-      },
-    });
+      //ADMIN OR OWNER
+      const { isFinished } = body;
+      if (isFinished) {
+        await prismadb.table.updateMany({
+          where: {
+            tableId: {
+              in: booking.bookedTables.map((table) => table.tableId),
+            },
+          },
+          data: {
+            isBooked: false,
+          },
+        });
 
-    // Create new images and tables
-    await prismadb.image.create({
-      data: {
-        restaurantId: params.restaurantId,
-        url: imageUrl,
-      },
-    });
+        await prismadb.booking.update({
+          where: {
+            bookingId: params.bookingId,
+          },
+          data: {
+            isFinished: true,
+          },
+        });
+        return new NextResponse("Booking Completed!", { status: 200 })
+      } else {
+        await prismadb.table.updateMany({
+          where: {
+            tableId: {
+              in: booking.bookedTables.map((table) => table.tableId),
+            },
+          },
+          data: {
+            isBooked: true,
+          },
+        });
 
-    await prismadb.table.createMany({
-      data: Array.from({ length: numTables }, () => ({
-        capacity: tableCapacity,
-        restaurantId: params.restaurantId,
-      })),
-    });
+        await prismadb.booking.update({
+          where: {
+            bookingId: params.bookingId,
+          },
+          data: {
+            isFinished: false,
+          },
+        });
+        return new NextResponse("Booking Re-opened!", { status: 200 })
+      }
+    } else {
+      const { date, numPeople } = body;
 
-    // Update restaurant details
-    const updatedRestaurant = await prismadb.restaurant.update({
-      where: {
-        restaurantId: params.restaurantId,
-      },
-      data: {
-        name,
-        isActive,
-      },
-      include: {
-        images: true,
-        tables: true,
-        bookings: true,
-      },
-    });
+      if (!date) {
+        return new NextResponse("Date is required.", { status: 403 });
+      }
 
-    return NextResponse.json(updatedRestaurant);
+      const newNumPeople = parseInt(numPeople, 10);
+
+      if (isNaN(newNumPeople)) {
+        return new NextResponse("Invalid value for numPeople.", {
+          status: 400,
+        });
+      }
+
+      if (booking.userId !== params.userId) {
+        return new NextResponse("Unauthorized", { status: 403 });
+      }
+
+      let dateToUpdate = booking.date;
+      let numPeopleToUpdate = booking.numPeople;
+
+      if (date && date !== booking.date && Date.parse(date)) {
+        dateToUpdate = date;
+      }
+
+      if (numPeople && parseInt(numPeople) !== booking.numPeople) {
+        const tableCapacity = await prismadb.table.findFirst({
+          where: {
+            restaurantId: booking.restaurantId,
+          },
+          select: {
+            capacity: true,
+          },
+        });
+
+        if (!tableCapacity) {
+          return new NextResponse("Table capacity information not available.", {
+            status: 500,
+          });
+        }
+
+        const requiredTables = Math.ceil(newNumPeople / tableCapacity.capacity);
+
+        const availableTables = await prismadb.table.findMany({
+          where: {
+            restaurantId: booking.restaurantId,
+            isBooked: false,
+          },
+        });
+
+        if (availableTables.length < requiredTables) {
+          return new NextResponse("Not enough capacity for this booking.", {
+            status: 400,
+          });
+        }
+
+        const tableIdsToBook = availableTables
+          .slice(0, requiredTables)
+          .map((table) => table.tableId);
+
+        numPeopleToUpdate = newNumPeople;
+
+        await prismadb.table.updateMany({
+          where: {
+            tableId: {
+              in: [
+                ...booking.bookedTables.map((table) => table.tableId),
+                ...tableIdsToBook,
+              ],
+            },
+          },
+          data: {
+            isBooked: true,
+          },
+        });
+      }
+
+      await prismadb.booking.update({
+        where: {
+          bookingId: params.bookingId,
+        },
+        data: {
+          date: dateToUpdate,
+          numPeople: numPeopleToUpdate,
+        },
+      });
+
+      return new NextResponse("Booking updated successfully.", { status: 200 });
+    }
   } catch (error) {
-    console.log("[RESTAURANT_PATCH]", error);
-    return new NextResponse("Internal Error.", { status: 500 });
+    console.error("BOOKING_PATCH", error);
+    return new NextResponse("Internal error.", { status: 500 });
   }
 }
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: { userId: string; restaurantId: string } }
+export async function GET(
+  req: Request,
+  { params }: { params: { userId: string; bookingId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.userId;
-    const role = session?.user?.role;
+    const booking = await prismadb.booking.findUnique({
+      where: {
+        userId: params.userId,
+        bookingId: params.bookingId,
+      },
+      include: {
+        bookedTables: {
+          select: {
+            tableId: true,
+          },
+        },
+      },
+    });
 
-    if (params.userId !== userId || !userId || role !== "admin") {
-      return new NextResponse("Unauthenticated.", { status: 401 });
+    if (!booking) {
+      return new NextResponse("Booking not found.", { status: 404 });
     }
 
-    if (!params.restaurantId) {
-      return new NextResponse("Restaurant ID required.", { status: 400 });
-    }
-
-    const restaurantByUserID = await prismadb.restaurant.findFirst({
-      where: {
-        restaurantId: params.restaurantId,
-        adminId: userId,
-      },
-    });
-
-    if (!restaurantByUserID) {
-      return new NextResponse("Unauthorized.", { status: 403 });
-    }
-
-    // Delete all associated images
-    await prismadb.image.deleteMany({
-      where: {
-        restaurantId: params.restaurantId,
-      },
-    });
-
-    // Delete all associated tables
-    await prismadb.table.deleteMany({
-      where: {
-        restaurantId: params.restaurantId,
-      },
-    });
-
-    // Check if there are active bookings associated with the restaurant
-    const activeBookings = await prismadb.booking.findMany({
-      where: {
-        restaurantId: params.restaurantId,
-        isActive: true,
-      },
-    });
-
-    if (activeBookings.length > 0) {
-      return new NextResponse(
-        "Cannot delete restaurant with active bookings.",
-        { status: 400 }
-      );
-    }
-
-    // Delete the restaurant
-    const deletedRestaurant = await prismadb.restaurant.deleteMany({
-      where: {
-        restaurantId: params.restaurantId,
-      },
-    });
-
-    return NextResponse.json(deletedRestaurant);
+    return NextResponse.json(booking);
   } catch (error) {
-    console.log("[RESTAURANT_DELETE]", error);
-    return new NextResponse("Internal Error.", { status: 500 });
+    console.error("BOOKING_GET", error);
+    return new NextResponse("Internal error.", { status: 500 });
   }
 }

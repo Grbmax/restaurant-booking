@@ -2,20 +2,23 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 export type BookingColumn = {
   bookingId: string;
   isActive: boolean;
-  restaurantId: string;
-  userId: string;
+  restaurant: string;
+  username: string;
   numPeople: number;
-  tableId: string;
+  isFinished: boolean;
   createdAt: string;
+  numTablesBooked: number;
 };
 
 export const columns: ColumnDef<BookingColumn>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "restaurant",
     header: "Restaurant",
   },
   {
@@ -23,20 +26,34 @@ export const columns: ColumnDef<BookingColumn>[] = [
     header: "Time & Date",
   },
   {
-    accessorKey: "userId",
-    header: "Name"
+    accessorKey: "username",
+    header: "Name",
   },
   {
     accessorKey: "numPeople",
-    header: "PAX"
+    header: "PAX",
   },
   {
-    accessorKey: "tableId",
-    header: "Table Number"
+    accessorKey: "numTablesBooked",
+    header: "Tables",
   },
   {
     accessorKey: "isActive",
     header: "Confirmed",
+  },
+  {
+    accessorKey: "isFinished",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Completed
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     id: "actions",

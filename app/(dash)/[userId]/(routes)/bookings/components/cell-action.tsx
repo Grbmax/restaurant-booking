@@ -26,23 +26,38 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-
+  const [completed, setCompleted] = useState(data.isFinished);
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
     toast.success("Booking ID copied to the clipboard.");
   };
 
+  const onToggleComplete = async (id: string) => {
+    try {
+      await axios.patch(
+        `/api/${params.userId}/bookings/${data.bookingId}`,
+        { isFinished: !completed }
+      );
+      setCompleted(!completed);
+      router.refresh();
+    } catch (error) {
+      toast.error("Something went wrong.");
+    }
+  };
+
   const onDelete = async () => {
     try {
-      setLoading(true)
-      await axios.delete(`/api/${params.userId}/bookings/${data.bookingId}`)
+      setLoading(true);
+      await axios.delete(`/api/${params.userId}/bookings/${data.bookingId}`);
       router.refresh();
-      toast.success("Booking deleted.")
+      toast.success("Booking deleted.");
     } catch (error) {
-      console.log(error)
-      toast.error("Make sure you have removed all images, tables, and bookings associated first.");
+      console.log(error);
+      toast.error(
+        "Make sure you have removed all images, tables, and bookings associated first."
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
       setOpen(false);
     }
   };
@@ -63,21 +78,19 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-                Actions
-            </DropdownMenuLabel>
-            <DropdownMenuItem onClick={() =>(onCopy(data.bookingId))}>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy ID
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/${params.userId}/bookings/${data.bookingId}`)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Update
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setOpen(true)}>
-                <Delete className="mr-2 h-4 w-4" />
-                Delete
-            </DropdownMenuItem>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => onCopy(data.bookingId)}>
+            <Copy className="mr-2 h-4 w-4" />
+            Copy ID
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onToggleComplete(data.bookingId)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Toggle Completion
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setOpen(true)}>
+            <Delete className="mr-2 h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

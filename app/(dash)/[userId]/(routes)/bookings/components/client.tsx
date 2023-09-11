@@ -6,7 +6,7 @@ import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { DataTable } from "@/components/ui/data-table";
+import { BookingTable } from "@/components/ui/booking-table";
 import { Role } from "@/types/next-auth";
 import { ApiList } from "@/components/ui/api-list";
 
@@ -39,7 +39,7 @@ export const BookingClient: React.FC<BookingClientProps> = ({
         }
       </div>
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="name" />
+      <BookingTable columns={columns} data={data} searchKey="username" />
       <Heading title="API Endpoints" description="API calls for bookings"/>
       <Separator />
       <ApiList entityName="bookings" entityIdName="bookingId" />
