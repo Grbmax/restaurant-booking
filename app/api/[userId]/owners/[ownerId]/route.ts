@@ -149,7 +149,6 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const userId = session?.user?.userId;
     const role = session?.user?.role;
-    console.log(params);
 
     if (!userId || !params.ownerId || params.userId !== userId) {
       return new NextResponse("Unauthenticated.", { status: 403 });
@@ -198,7 +197,7 @@ export async function DELETE(
     prismadb.$disconnect();
     return new NextResponse("Owner deleted successfully.", { status: 200 });
   } catch (error) {
-    console.log("OWNER_DELETE", error);
+    console.log("[OWNER_DELETE]", error);
     return new NextResponse("Internal error.", { status: 500 });
   }
 }

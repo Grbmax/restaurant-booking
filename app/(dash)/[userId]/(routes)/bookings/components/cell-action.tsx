@@ -40,6 +40,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       );
       setCompleted(!completed);
       router.refresh();
+      router.push('/')
     } catch (error) {
       toast.error("Something went wrong.");
     }

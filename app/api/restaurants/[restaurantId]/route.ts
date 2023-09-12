@@ -32,8 +32,6 @@ export async function GET(
         },
       },
     });
-    console.log(restaurant);
-    console.log(params.restaurantId);
     return NextResponse.json(restaurant);
   } catch (error) {
     console.log("[RESTAURANT_GET]", error);

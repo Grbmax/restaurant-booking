@@ -91,7 +91,7 @@ export async function POST(
         userId: params.userId,
         restaurantId,
         bookedTables: {
-          connect: tableIds.map((tableId) => ({ tableId })),
+          connect: tableIds.map((tableId: any) => ({ tableId })),
         },
       },
     });
@@ -104,8 +104,8 @@ export async function POST(
         isBooked: true,
       },
     });
-
-    return NextResponse.json(createdBooking);
+    const length = tablesToBook.length
+    return NextResponse.json({createdBooking, tables: length });
   } catch (error) {
     console.log("BOOKING_POST", error);
     return new NextResponse("Internal error.", { status: 500 });
@@ -159,8 +159,9 @@ export async function DELETE(
     // Check if the current session is valid for admins and owners
     const session = await getServerSession(authOptions);
     if (
-      session &&
-      (session.user?.role === "admin" || session.user?.role === "owner")
+      (session &&
+      (session.user?.role === "admin" || session.user?.role === "owner")) ||
+      booking.userId === params.userId
     ) {
       // Continue with the deletion process
       // Update the associated tables to mark them as available (isBooked: false)
