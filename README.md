@@ -8,7 +8,6 @@ First, install the dependencies:
 ```bash
 yarn install
 ```
-
 Next, setup PRISMA as required(PRISMA SETUP): 
 ```bash
 npx prisma generate
@@ -26,6 +25,8 @@ Finally, run the development server:
 ```bash
 yarn run dev
 ```
+
+Make sure you create an enviornment variable file to store the DB_URL, NextAuth SECRET, NextAuth URL, and any other necessary data.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
