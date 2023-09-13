@@ -3,17 +3,20 @@ Stack : [ Next.js13, NextAuth, PrismaORM, Planetscale (remote sv), TailwindCSS, 
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
 
 ```bash
 yarn install
-yarn run dev
 ```
-(PRISMA SETUP)
-```
+Next, setup PRISMA as required(PRISMA SETUP): 
+```bash
 npx prisma generate
 npx prisma db push (If schema isn't on the remote DB)
 npx prisma db seed (Seed the db with pre-existing data if needed)
+```
+Finally, run the development server:
+```bash
+yarn run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
