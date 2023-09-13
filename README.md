@@ -8,12 +8,20 @@ First, install the dependencies:
 ```bash
 yarn install
 ```
+
 Next, setup PRISMA as required(PRISMA SETUP): 
 ```bash
 npx prisma generate
-npx prisma db push (If schema isn't on the remote DB)
-npx prisma db seed (Seed the db with pre-existing data if needed)
 ```
+(If schema isn't on the remote DB)
+```
+npx prisma db push
+```
+(Seed the db with pre-existing data if needed)
+```
+npx prisma db seed 
+```
+
 Finally, run the development server:
 ```bash
 yarn run dev
