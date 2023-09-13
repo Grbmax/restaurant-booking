@@ -1,5 +1,5 @@
 This is a restaurant booking web-application which provides API's for a front-end to consume. The application supports an admin/restaurant panel to manage restaurants, owners, and bookings.
-Stack : [ Next.js13, NextAuth, PrismaORM, Planetscale (remote sv), TailwindCSS, shadcnUI ]
+Stack : [ Next.js13, NextAuth, PrismaORM, Planetscale (remote MySQL sv), TailwindCSS, shadcnUI ]
 
 ## Getting Started
 
