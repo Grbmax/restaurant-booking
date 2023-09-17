@@ -40,7 +40,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       );
       setCompleted(!completed);
       router.refresh();
-      router.push('/')
+      toast.success("Booking updated.");
     } catch (error) {
       toast.error("Something went wrong.");
     }
