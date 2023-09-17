@@ -29,18 +29,18 @@ export const RestaurantClient: React.FC<RestaurantClientProps> = ({
           title={`Restaurants (${data.length})`}
           description="Manage your restaurants."
         />
-        { role === "admin" &&
+        {role === "admin" && (
           <Button
             onClick={() => router.push(`/${params.userId}/restaurants/new`)}
           >
             <Plus className="mr-2 h-4 w-4" />
             Add New
           </Button>
-        }
+        )}
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />
-      <Heading title="API Endpoints" description="API calls for restaurants"/>
+      <Heading title="API Endpoints" description="API calls for restaurants"  />
       <Separator />
       <ApiList entityName="restaurants" entityIdName="restaurantId" />
     </>
