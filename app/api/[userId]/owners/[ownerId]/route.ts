@@ -5,11 +5,14 @@ import { hash } from "bcrypt";
 import prismadb from "@/lib/prismadb";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function GET({
-  params,
-}: {
-  params: { userId: string; ownerId: string };
-}) {
+export async function GET(
+  _req: Request,
+  {
+    params,
+  }: {
+    params: { userId: string; ownerId: string };
+  }
+) {
   try {
     const owner = await prismadb.user.findUnique({
       where: {

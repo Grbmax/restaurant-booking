@@ -85,6 +85,3 @@ export async function POST(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
-
-//optional: GET feature for users.
-//Currently this is being done only on front-end and not as an API service.
