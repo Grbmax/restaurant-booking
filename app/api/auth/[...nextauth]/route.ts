@@ -3,9 +3,9 @@ import { compare } from "bcrypt";
 import NextAuth, {
   RequestInternal,
   type NextAuthOptions,
+  User,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
         _req: Pick<RequestInternal, "query" | "body" | "headers" | "method">
       ) {
         try {
-          if (!credentials?.email || !credentials.password) {
+          if (!credentials?.email || !credentials?.password) {
             return null;
           }
           const user = await prismadb.user.findUnique({
@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               role: user.role,
               image: user.image,
-            };
+            } as User;
           }
           return null;
         } catch (error: any) {
@@ -60,7 +60,6 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     jwt: ({ token, user }) => {
-      // console.log('JWT Callback', {token,user})
       if (user) {
         token.userId = user.userId;
         token.role = user.role;
@@ -68,7 +67,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: ({ session, token }) => {
-      // console.log('Session Callback', {session, token})
       if (token && session.user) {
         session.user.role = token.role;
         session.user.userId = token.userId;
