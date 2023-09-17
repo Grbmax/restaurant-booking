@@ -235,9 +235,6 @@ export const RestaurantForm: React.FC<RestaurantFormProps> = ({
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Is Active</FormLabel>
-                    <FormDescription>
-                      This restaurant is currently not active.
-                    </FormDescription>
                   </div>
                 </FormItem>
               )}
